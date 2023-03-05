@@ -1,11 +1,11 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import ServiceTypes from "./ServiceTypes";
+import { ServiceTypes } from "./Servicetype/ServiceTypes";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import ServiceList from "./ServiceList";
+import CrudTable from "./Servicelist/CrudTable";
 import Box from "@mui/material/Box";
 function Services() {
   const [value, setValue] = React.useState("1");
@@ -24,7 +24,7 @@ function Services() {
           </TabList>
         </Box>
         <TabPanel value="1">
-          <ServiceList />
+          <CrudTable />
         </TabPanel>
         <TabPanel value="2">
           <ServiceTypes />

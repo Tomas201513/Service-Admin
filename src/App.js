@@ -10,12 +10,11 @@ import SignUp from "./components/SignUp";
 import Authform from "./components/Authform";
 import { SnackbarProvider } from "notistack";
 import PrivateRoute from "./utils/PrivateRoute";
-// import Tablee from "./pages/Tablee";
 import { CssBaseline, Table } from "@mui/material";
 import Dashboard from "./pages/Dashboard";
 import Payment from "./pages/Payment";
 import Services from "./pages/Services";
-import ServiceTypes from "./pages/ServiceTypes";
+import { ServiceTypes } from "./pages/Servicetype/ServiceTypes";
 import ServiceRequest from "./pages/ServiceRequest";
 import Employee from "./pages/Employee";
 import Department from "./pages/Department";
@@ -28,7 +27,8 @@ import Calendar from "./pages/Calendar";
 import Kanban from "./pages/Kanban";
 import Chat from "./pages/Chat";
 import Report from "./pages/Report";
-import ServiceList from "./pages/ServiceList";
+// import ServiceList from "./pages/Servicelist/ServiceList";
+import CrudTable from "./pages/Servicelist/CrudTable";
 import { QueryClient, QueryClientProvider } from "react-query";
 const queryClient = new QueryClient();
 const App = () => {
@@ -65,7 +65,7 @@ const App = () => {
                     <Route
                       index
                       path="/services/servicelist"
-                      element={<ServiceList />}
+                      element={<CrudTable />}
                     />
 
                     <Route path="/services/type" element={<ServiceTypes />} />

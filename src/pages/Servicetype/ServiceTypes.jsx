@@ -1,6 +1,6 @@
 import React from "react";
-import { ServiceTypesCrud } from "../Table/ServiceTypesCrud";
-function ServiceTypes() {
+import { ServiceTypesCrud } from "./ServiceTypesCrud";
+export function ServiceTypes() {
   const service_type_column = [
     {
       header: "Id",
@@ -37,5 +37,3 @@ function ServiceTypes() {
     <ServiceTypesCrud columnss={service_type_column} api={service_type_api} />
   );
 }
-
-export default ServiceTypes;
