@@ -5,6 +5,7 @@ import MaterialReactTable from "material-react-table";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { ExportToCsv } from "export-to-csv";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import axios from "axios";
 import {
   Box,
@@ -19,7 +20,7 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { Delete, Edit } from "@mui/icons-material";
+import { Delete, Edit, MultilineChart } from "@mui/icons-material";
 import CreateNewAccountModal from "./CreateNewAccountModal";
 import DialogContentText from "@mui/material/DialogContentText";
 import { SnackbarProvider, useSnackbar } from "notistack";
@@ -27,7 +28,10 @@ import { SnackbarProvider, useSnackbar } from "notistack";
 export const ServiceTypesCrud = ({ columnss, api }) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const [multidelitems, setMultidelitems] = useState([]);
   const [loading, setLoading] = useState();
+  const [deleteitems, setDeleteitems] = useState([]);
+
   const queryClient = useQueryClient();
 
   const [open, setOpen] = useState(false);
@@ -46,17 +50,21 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
   const csvExporter = new ExportToCsv(csvOptions);
 
   const handleClickOpen = (row) => {
-    setLoading(row.getValue("id"));
+    setDeleteitems(row.getValue("id"));
     console.log(row.getValue("id"));
     setOpen(true);
   };
-
+  const handleClickOpenmulti = (row) => {
+    setDeleteitems(row.map((row) => row.getValue("id")));
+    console.log(row.map((row) => row.getValue("id")));
+    setOpen(true);
+  };
   const handleClose = () => {
-    setLoading("");
+    setDeleteitems("");
     setOpen(false);
   };
-  const handleDelete = (loading) => {
-    handleDeleteRow(loading);
+  const handleDelete = (deleteitems) => {
+    handleDeleteRow(deleteitems);
   };
   // create a useMutation hook to handle the POST request to the API and update the browser cache
   const { mutate: createNewRow, isLoading: isCreating } = useMutation(
@@ -111,24 +119,26 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
   const handleDeleteRow = async (values, raw) => {
     // console.log(values.original.id);
     // setLoading(values.original.id);
-    console.log(loading);
-    const response = await fetch(`${api}${loading}/`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
+    console.log(deleteitems);
+    deleteitems.map(async (id) => {
+      const response = await fetch(`${api}${id}/`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 204) {
+        //replace this ersponse  with stickynote status
+        console.log(response.status);
+        enqueueSnackbar("Service Type Deleted", {
+          variant: "success",
+        });
+      } else {
+        enqueueSnackbar(`unable to delete ${id}`, {
+          variant: "error",
+        });
+      }
     });
-    if (response.status === 204) {
-      //replace this ersponse  with stickynote status
-      console.log(response.status);
-      enqueueSnackbar("Service Type Deleted", {
-        variant: "success",
-      });
-    } else {
-      enqueueSnackbar("unable Delete", {
-        variant: "error",
-      });
-    }
     handleClose();
   };
 
@@ -169,8 +179,8 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
       <MaterialReactTable
         initialState={{ density: "compact" }}
         positionToolbarAlertBanner="bottom"
-        enableRowSelection={rawSelection}
-        // enableMultiRowSelection=
+        enableRowSelection
+        // enableMultiRowSelection
         muiTableBodyCellEditTextFieldProps={({ cell }) => ({
           onBlur: (event) => {
             console.info(event, cell.id);
@@ -231,6 +241,22 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
             </Button>
             <Button
               color="primary"
+              onClick={() => {
+                handleClickOpenmulti(table.getSelectedRowModel().rows);
+              }}
+              // onClick={() =>
+              //   setMultidelitems(
+              //     table.getSelectedRowModel().rows.map((row) => row.original.id)
+              //   )
+              // }
+              startIcon={<DeleteForeverIcon />}
+              variant="text"
+            >
+              Delete Selected
+            </Button>
+
+            <Button
+              color="primary"
               //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
               onClick={handleExportData}
               startIcon={<FileDownloadIcon />}
@@ -267,7 +293,7 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
           {"Use Google's location service?"}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">{`${loading}`}</DialogContentText>
+          <DialogContentText id="alert-dialog-description">{`${deleteitems}`}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDelete}>Delete</Button>

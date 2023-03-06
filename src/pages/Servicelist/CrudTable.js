@@ -13,6 +13,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Select,
   IconButton,
   MenuItem,
   Stack,
@@ -20,8 +21,6 @@ import {
   Tooltip,
 } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
-import CreateNewAccountModal from "./CreateNewAccountModal";
-import DeleteNewRawModal from "./DeleteNewRawModal";
 import DialogContentText from "@mui/material/DialogContentText";
 import { SnackbarProvider, useSnackbar } from "notistack";
 
@@ -104,7 +103,7 @@ const CrudTable = () => {
     },
     {
       header: "Service Type",
-      accessorKey: "service_types",
+      accessorKey: "service_types.name",
       // accessorFn: (data2) => {
       //   // const x = data2.filter((d) => d.id === data2.service_types);
       //   return JSON.stringify(data2);
@@ -415,3 +414,90 @@ const CrudTable = () => {
 // const validateAge = (age) => age >= 18 && age <= 50;
 
 export default CrudTable;
+
+const CreateNewAccountModal = ({ open, columns, onClose, onSubmit, data2 }) => {
+  const [values, setValues] = useState(() =>
+    columns.reduce((acc, column) => {
+      acc[column.accessorKey ?? ""] = "";
+      return acc;
+    }, {})
+  );
+
+  const handleSubmit = (e) => {
+    //put your validation logic here
+    console.log(`suuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu`);
+
+    console.log(values);
+    onSubmit(values);
+    onClose();
+  };
+
+  return (
+    <Dialog open={open}>
+      <DialogTitle textAlign="center">Create New Account</DialogTitle>
+      <DialogContent>
+        <form onSubmit={(e) => e.preventDefault()}>
+          <Stack
+            sx={{
+              width: "100%",
+              minWidth: { xs: "300px", sm: "360px", md: "400px" },
+              gap: "1.5rem",
+            }}
+          >
+            <TextField
+              key={columns.name}
+              label={columns.Name}
+              name={columns.name}
+              onChange={(e) => setValues({ ...values, name: e.target.value })}
+              value={values.name}
+              variant="outlined"
+            />
+            <TextField
+              key={columns.requirment}
+              label={columns.Requirment}
+              name={columns.requirment}
+              onChange={(e) =>
+                setValues({ ...values, requirment: e.target.value })
+              }
+              value={values.requirment}
+              variant="outlined"
+            />
+            <TextField
+              key={columns.description}
+              label={columns.Description}
+              name={columns.description}
+              onChange={(e) =>
+                setValues({ ...values, description: e.target.value })
+              }
+              value={values.description}
+              variant="outlined"
+            />
+
+            <Select
+              key={columns.service_types}
+              label={columns.Service_Types}
+              name={columns.service_types}
+              onChange={(e) =>
+                setValues({ ...values, service_types: e.target.value })
+              }
+              value={values.service_types}
+              variant="outlined"
+            >
+              {data2.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </Stack>
+        </form>
+      </DialogContent>
+      <DialogActions sx={{ p: "1.25rem" }}>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button color="secondary" onClick={handleSubmit} variant="contained">
+          Create New Account
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};

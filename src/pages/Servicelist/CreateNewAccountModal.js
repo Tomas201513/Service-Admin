@@ -31,6 +31,8 @@ const CreateNewAccountModal = ({ open, columns, onClose, onSubmit, data2 }) => {
 
   const handleSubmit = (e) => {
     //put your validation logic here
+    console.log(`suuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu`);
+
     console.log(values);
     onSubmit(values);
     onClose();
