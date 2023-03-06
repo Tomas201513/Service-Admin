@@ -12,7 +12,9 @@ import {
   IconButton,
   MenuItem,
   Stack,
+  Select,
   TextField,
+  TextareaAutosize,
   Tooltip,
 } from "@mui/material";
 
@@ -43,16 +45,26 @@ const CreateNewAccountModal = ({ open, columns, onClose, onSubmit }) => {
               gap: "1.5rem",
             }}
           >
-            {columns.map((column) => (
-              <TextField
-                key={column.accessorKey}
-                label={column.header}
-                name={column.accessorKey}
-                onChange={(e) =>
-                  setValues({ ...values, [e.target.name]: e.target.value })
-                }
-              />
-            ))}
+            <TextField
+              key={columns.name}
+              label={columns.Name}
+              name={columns.name}
+              onChange={(e) => setValues({ ...values, name: e.target.value })}
+              value={values.name}
+              variant="outlined"
+            />
+
+            <TextareaAutosize
+              minRows={5}
+              key={columns.description}
+              label={columns.Description}
+              name={columns.description}
+              onChange={(e) =>
+                setValues({ ...values, description: e.target.value })
+              }
+              value={values.description}
+              variant="outlined"
+            />
           </Stack>
         </form>
       </DialogContent>

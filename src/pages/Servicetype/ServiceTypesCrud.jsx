@@ -1,5 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import MaterialReactTable from "material-react-table";
 // const axios = require("axios").default;
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -24,6 +30,7 @@ import { Delete, Edit, MultilineChart } from "@mui/icons-material";
 import CreateNewAccountModal from "./CreateNewAccountModal";
 import DialogContentText from "@mui/material/DialogContentText";
 import { SnackbarProvider, useSnackbar } from "notistack";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 export const ServiceTypesCrud = ({ columnss, api }) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -31,6 +38,7 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
   const [multidelitems, setMultidelitems] = useState([]);
   const [loading, setLoading] = useState();
   const [deleteitems, setDeleteitems] = useState([]);
+  const [showitems, setShowitems] = useState();
 
   const queryClient = useQueryClient();
 
@@ -44,10 +52,16 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
     showLabels: true,
     useBom: true,
     useKeysAsHeaders: false,
-    headers: columns.map((c) => c.header),
+    headers: columns?.map((c) => c.header),
   };
 
   const csvExporter = new ExportToCsv(csvOptions);
+
+  const handleClickShow = (raw) => {
+    setShowitems(Object.values(raw.original));
+    console.log(raw.original);
+    setOpen(true);
+  };
 
   const handleClickOpen = (row) => {
     setDeleteitems(row.getValue("id"));
@@ -55,13 +69,14 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
     setOpen(true);
   };
   const handleClickOpenmulti = (row) => {
-    setDeleteitems(row.map((row) => row.getValue("id")));
-    console.log(row.map((row) => row.getValue("id")));
+    setDeleteitems(row?.map((row) => row.getValue("id")));
+    console.log(row?.map((row) => row.getValue("id")));
     setOpen(true);
   };
   const handleClose = () => {
     setDeleteitems("");
     setOpen(false);
+    setShowitems("");
   };
   const handleDelete = (deleteitems) => {
     handleDeleteRow(deleteitems);
@@ -120,7 +135,7 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
     // console.log(values.original.id);
     // setLoading(values.original.id);
     console.log(deleteitems);
-    deleteitems.map(async (id) => {
+    deleteitems?.map(async (id) => {
       const response = await fetch(`${api}${id}/`, {
         method: "DELETE",
         headers: {
@@ -163,7 +178,7 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
 
   //should be memoized or stable
   const handleExportRows = (rows) => {
-    csvExporter.generateCsv(rows.map((row) => row.original));
+    csvExporter.generateCsv(rows?.map((row) => row.original));
   };
 
   const handleExportData = () => {
@@ -177,23 +192,59 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
   return (
     <>
       <MaterialReactTable
-        initialState={{ density: "compact" }}
+        // enableColumnResizing
+
+        enablePinning
+        enableRowVirtualization
+        enableGrouping
+        enableStickyHeader
+        enableStickyFooter
+        initialState={{
+          density: "compact",
+          columnVisibility: { id: false },
+          expanded: false, //expand all groups by default
+          columnPinning: { left: ["id"] },
+          // pagination: { pageIndex: 0, pageSize: 20 },
+          // sorting: [{ id: "name", desc: false }], //sort by state by default
+        }}
+        displayColumnDefOptions={{
+          "mrt-row-actions": {
+            header: "", //change header text
+            size: 120, //make actions column wider
+          },
+        }}
+        muiToolbarAlertBannerChipProps={{ color: "primary" }}
+        muiTableContainerProps={{
+          sx: {
+            maxHeight: 700,
+            backgroundColor: "#e6f7ff",
+            borderRadius: "10px",
+            color: "primary",
+          },
+        }}
         positionToolbarAlertBanner="bottom"
         enableRowSelection
-        // enableMultiRowSelection
+        enableRowNumbers
+        rowNumberMode="original" //default
         muiTableBodyCellEditTextFieldProps={({ cell }) => ({
           onBlur: (event) => {
             console.info(event, cell.id);
           },
         })}
-        enableRowVirtualization
         muiSelectCheckboxProps={{
           color: "secondary", //makes all checkboxes use the secondary color
+        }}
+        muiTableHeadCellProps={{
+          align: "left",
+        }}
+        muiTableBodyCellProps={{
+          align: "left",
         }}
         columns={columns}
         data={data}
         enableEditing={true}
         editingMode="modal"
+        enableSorting={true}
         enableColumnOrdering
         onEditingRowSave={handleSaveRow}
         positionActionsColumn="last"
@@ -202,25 +253,39 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
             tableLayout: "fixed",
           },
         }}
-        renderRowActions={({ row, table }) => (
-          <Box sx={{ display: "flex", gap: "rem" }}>
-            <Tooltip arrow placement="right" title="Edit">
-              <IconButton onClick={() => table.setEditingRow(row)}>
-                <Edit fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip
-              arrow
-              placement="right"
-              title="Delete"
-              onClick={() => handleClickOpen(row)}
-            >
-              <IconButton>
-                <Delete fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )}
+        renderRowActions={({ row, table }) =>
+          !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected() ? (
+            <Box sx={{ display: "flex", gap: "rem", ml: "1rem" }}>
+              <Tooltip arrow placement="right" title="Edit">
+                <IconButton onClick={() => table.setEditingRow(row)}>
+                  <Edit fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip
+                arrow
+                placement="right"
+                title="Delete"
+                onClick={() => handleClickOpen(row)}
+              >
+                <IconButton>
+                  <Delete fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip
+                arrow
+                placement="right"
+                title="show"
+                onClick={() => handleClickShow(row)}
+              >
+                <IconButton>
+                  <VisibilityIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          ) : (
+            <></>
+          )
+        }
         renderTopToolbarCustomActions={({ table }) => (
           <Box
             sx={{
@@ -230,50 +295,59 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
               flexWrap: "wrap",
             }}
           >
-            <Button
-              size="small"
-              sx={{ size: "" }}
-              color="primary"
-              onClick={() => setCreateModalOpen(true)}
-              variant="text"
-            >
-              <AddIcon /> Create
-            </Button>
-            <Button
-              color="primary"
-              onClick={() => {
-                handleClickOpenmulti(table.getSelectedRowModel().rows);
-              }}
-              // onClick={() =>
-              //   setMultidelitems(
-              //     table.getSelectedRowModel().rows.map((row) => row.original.id)
-              //   )
-              // }
-              startIcon={<DeleteForeverIcon />}
-              variant="text"
-            >
-              Delete Selected
-            </Button>
+            {!table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected() ? (
+              <Tooltip title="create service type">
+                <Button
+                  color="primary"
+                  onClick={() => setCreateModalOpen(true)}
+                  variant="text"
+                  startIcon={<AddIcon />}
+                  size="large"
+                />
+              </Tooltip>
+            ) : (
+              <Tooltip title="delete selected">
+                <Button
+                  color="secondary"
+                  onClick={() => {
+                    handleClickOpenmulti(table.getSelectedRowModel().rows);
+                  }}
+                  startIcon={<DeleteForeverIcon />}
+                  variant="text"
+                  sx={{ fontSize: "small" }}
+                />
+              </Tooltip>
+            )}
 
-            <Button
-              color="primary"
-              //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
-              onClick={handleExportData}
-              startIcon={<FileDownloadIcon />}
-              variant="text"
-            ></Button>
-
-            <Button
-              disabled={
-                !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
-              }
-              //only export selected rows
-              onClick={() => handleExportRows(table.getSelectedRowModel().rows)}
-              startIcon={<FileDownloadIcon />}
-              variant="text"
-            >
-              Export Selected Rows
-            </Button>
+            {!table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected() ? (
+              <Tooltip title="export csv">
+                <Button
+                  color="primary"
+                  //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+                  onClick={handleExportData}
+                  startIcon={<FileDownloadIcon />}
+                  variant="text"
+                  sx={{ fontSize: "small" }}
+                />
+              </Tooltip>
+            ) : (
+              <Tooltip title="export selected raws">
+                <Button
+                  // disabled={
+                  //   !table.getIsSomeRowsSelected() &&
+                  //   !table.getIsAllRowsSelected()
+                  // }
+                  //only export selected rows
+                  onClick={() =>
+                    handleExportRows(table.getSelectedRowModel().rows)
+                  }
+                  startIcon={<FileDownloadIcon />}
+                  variant="text"
+                  color="secondary"
+                  sx={{ fontSize: "small" }}
+                />
+              </Tooltip>
+            )}
           </Box>
         )}
       />
@@ -290,13 +364,16 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"Use Google's location service?"}
+          {showitems ? "" : " Are you sure?"}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">{`${deleteitems}`}</DialogContentText>
+          <DialogContentText id="alert-dialog-description">
+            {`${deleteitems}` +
+              `${showitems[0]} '\t' ${showitems[1]} +'\n'+ ${showitems[2]}`}
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDelete}>Delete</Button>
+          {showitems ? "" : <Button onClick={handleDelete}>Delete</Button>}
           <Button onClick={handleClose}>Cancel</Button>
         </DialogActions>
       </Dialog>

@@ -130,7 +130,7 @@ const CrudTable = () => {
     showLabels: true,
     useBom: true,
     useKeysAsHeaders: false,
-    headers: columns.map((c) => c.header),
+    headers: columns?.map((c) => c.header),
   };
 
   const csvExporter = new ExportToCsv(csvOptions);
@@ -150,7 +150,7 @@ const CrudTable = () => {
   };
 
   const { mutate: handleCreateNewRow, isLoading: isCreating } = useMutation(
-    (values) => axios.post("http://127.0.0.1:8000/service/service/", values),
+    (values) => axios?.post("http://127.0.0.1:8000/service/service/", values),
     {
       onSuccess: () => {
         queryClient.invalidateQueries("service_types");
@@ -235,7 +235,7 @@ const CrudTable = () => {
 
   //should be memoized or stable
   const handleExportRows = (rows) => {
-    csvExporter.generateCsv(rows.map((row) => row.original));
+    csvExporter.generateCsv(rows?.map((row) => row.original));
   };
 
   const handleExportData = () => {
@@ -483,7 +483,7 @@ const CreateNewAccountModal = ({ open, columns, onClose, onSubmit, data2 }) => {
               value={values.service_types}
               variant="outlined"
             >
-              {data2.map((item) => (
+              {data2?.map((item) => (
                 <MenuItem key={item.id} value={item.id}>
                   {item.name}
                 </MenuItem>
