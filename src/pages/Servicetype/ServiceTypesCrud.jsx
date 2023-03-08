@@ -4,9 +4,10 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useReducer,
   useCallback,
 } from "react";
-import MaterialReactTable from "material-react-table";
+import PrintIcon from "@mui/icons-material/Print";
 // const axios = require("axios").default;
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { ExportToCsv } from "export-to-csv";
@@ -21,12 +22,18 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
   MenuItem,
   Stack,
   TextField,
   Tooltip,
 } from "@mui/material";
+import MaterialReactTable from "material-react-table";
 import { Delete, Edit, MultilineChart } from "@mui/icons-material";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 import CreateNewAccountModal from "./CreateNewAccountModal";
 import DialogContentText from "@mui/material/DialogContentText";
 import { SnackbarProvider, useSnackbar } from "notistack";
@@ -34,66 +41,105 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 
 export const ServiceTypesCrud = ({ columnss, api }) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [rowSelection, setRowSelection] = useState({});
+  // console.log(rowSelection);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const [multidelitems, setMultidelitems] = useState([]);
-  const [loading, setLoading] = useState();
-  const [deleteitems, setDeleteitems] = useState([]);
-  const [showitems, setShowitems] = useState();
-
   const queryClient = useQueryClient();
-
   const [open, setOpen] = useState(false);
-  const [rawSelection, setrawSelection] = useState(false);
   const columns = columnss;
-  const csvOptions = {
-    fieldSeparator: ",",
-    quoteStrings: '"',
-    decimalSeparator: ".",
-    showLabels: true,
-    useBom: true,
-    useKeysAsHeaders: false,
-    headers: columns?.map((c) => c.header),
-  };
 
-  const csvExporter = new ExportToCsv(csvOptions);
-
-  const handleClickShow = (raw) => {
-    setShowitems(Object.values(raw.original));
-    console.log(raw.original);
+  const [deleteitems, setDeleteitems] = useState([]);
+  const [deleteitemsdetail, setDeleteitemsdetail] = useState([]);
+  const [showitems, setShowitems] = useState();
+  const handleClickShow = (row) => {
+    setShowitems(Object.values(row.original));
+    console.log(Object.values(row.original));
     setOpen(true);
   };
 
   const handleClickOpen = (row) => {
-    setDeleteitems(row.getValue("id"));
+    deleteitems.push(row.getValue("id"));
+    deleteitemsdetail.push(row.getValue("name"));
     console.log(row.getValue("id"));
+    console.log(row.getValue("name"));
+
+    // this is another way to get
+    // setDeleteitems(Object.values(row.original)[0]);
+    // setDeleteitemsdetail(Object.values(row.original)[1]);
+    // console.log(Object.values(row.original));
+
     setOpen(true);
   };
   const handleClickOpenmulti = (row) => {
     setDeleteitems(row?.map((row) => row.getValue("id")));
-    console.log(row?.map((row) => row.getValue("id")));
+    setDeleteitemsdetail(row?.map((row) => row.getValue("name")));
+    console.log(row?.map((row) => row.getValue("name")));
     setOpen(true);
   };
   const handleClose = () => {
-    setDeleteitems("");
-    setOpen(false);
+    setDeleteitems([]);
     setShowitems("");
+    setDeleteitemsdetail([]);
+    setOpen(false);
   };
   const handleDelete = (deleteitems) => {
     handleDeleteRow(deleteitems);
   };
+  const handleDeleteRow = async (values, row) => {
+    // console.log(values.original.id);
+    // setLoading(values.original.id);
+    console.log(deleteitems);
+    // console.log(deleteitemsdetail);
+    deleteitems.map(async (id, index) => {
+      axios
+        .delete(`${api}${id}/`)
+        .then((response) => {
+          if (response.status === 204) {
+            //replace this ersponse  with stickynote status
+            console.log(response.status);
+            enqueueSnackbar(
+              `Service Type ${deleteitemsdetail[index]} Deleted`,
+              {
+                variant: "success",
+              },
+              setRowSelection({})
+            );
+          } else {
+            enqueueSnackbar(
+              `UNABLE TO DELETE SERVICE TYPE ${deleteitemsdetail[index]}`,
+              {
+                variant: "error",
+              }
+            );
+          }
+        })
+        .catch((error) => {
+          enqueueSnackbar(error.response.data.error, {
+            variant: "error",
+          });
+        });
+    });
+    handleClose();
+    queryClient.invalidateQueries("service_types");
+  };
+
   // create a useMutation hook to handle the POST request to the API and update the browser cache
   const { mutate: createNewRow, isLoading: isCreating } = useMutation(
     (values) => axios.post(api, values),
     {
-      onSuccess: () => {
+      onSuccess: (values) => {
         queryClient.invalidateQueries("service_types");
-        enqueueSnackbar("Service Type Updated", {
-          variant: "success",
-        });
+
+        enqueueSnackbar(
+          `Service Type ${JSON.stringify(values.data.name)} Created`,
+          {
+            variant: "success",
+          }
+        );
       },
       onError: (error) => {
         console.log(error);
-        enqueueSnackbar("Service Type Updated", {
+        enqueueSnackbar("unable to create Service Type ", {
           variant: "error",
         });
       },
@@ -101,7 +147,7 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
   );
 
   //exitEditingMode--used to cancil dialogebox
-  //row--passes the position of the raw
+  //row--passes the position of the row
   //values--pass the real data
   const handleSaveRow = async ({ exitEditingMode, row, values }) => {
     console.log(values.id);
@@ -125,37 +171,13 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
         variant: "success",
       });
     } else {
-      alert(response.status);
+      enqueueSnackbar(`UNABLE TO UPDATE SERVICE TYPE ${values.name}`, {
+        variant: "error",
+      });
     }
     exitEditingMode();
   };
   // create a function that update local state when the user edits a cell
-
-  const handleDeleteRow = async (values, raw) => {
-    // console.log(values.original.id);
-    // setLoading(values.original.id);
-    console.log(deleteitems);
-    deleteitems?.map(async (id) => {
-      const response = await fetch(`${api}${id}/`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.status === 204) {
-        //replace this ersponse  with stickynote status
-        console.log(response.status);
-        enqueueSnackbar("Service Type Deleted", {
-          variant: "success",
-        });
-      } else {
-        enqueueSnackbar(`unable to delete ${id}`, {
-          variant: "error",
-        });
-      }
-    });
-    handleClose();
-  };
 
   const handleCancelRowEdits = () => {
     // setValidationErrors({});
@@ -168,15 +190,20 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
       refetchInterval: 1000,
     }
   );
-  if (isLoading) return console.log(isLoading);
 
   if (error) return "An error has occurred: " + error.message;
+  if (isLoading) return console.log(isLoading);
 
-  //   useEffect(() => {
-  //     // getApiData();
-  //   }, []);
-
-  //should be memoized or stable
+  const csvOptions = {
+    fieldSeparator: ",",
+    quoteStrings: '"',
+    decimalSeparator: ".",
+    showLabels: true,
+    useBom: true,
+    useKeysAsHeaders: false,
+    headers: columns?.map((c) => c.header),
+  };
+  const csvExporter = new ExportToCsv(csvOptions);
   const handleExportRows = (rows) => {
     csvExporter.generateCsv(rows?.map((row) => row.original));
   };
@@ -185,35 +212,46 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
     csvExporter.generateCsv(data);
   };
 
-  if (isLoading) return console.log(isLoading);
-
-  if (error) return "An error has occurred: " + error.message;
-
   return (
     <>
       <MaterialReactTable
-        // enableColumnResizing
-
+        columns={columns}
+        data={data}
+        enableEditing={true}
+        editingMode="modal"
+        enableSorting={true}
+        enableColumnOrdering
+        onEditingRowSave={handleSaveRow}
+        positionActionsColumn="last"
         enablePinning
         enableRowVirtualization
-        enableGrouping
         enableStickyHeader
         enableStickyFooter
+        positionToolbarAlertBanner="bottom"
+        enableRowSelection
+        state={{ rowSelection }}
+        onRowSelectionChange={setRowSelection}
+        enableRowNumbers
+        rowNumberMode="original" //default
+        muiTableProps={{
+          sx: {
+            tableLayout: "fixed",
+          },
+        }}
         initialState={{
           density: "compact",
           columnVisibility: { id: false },
           expanded: false, //expand all groups by default
           columnPinning: { left: ["id"] },
-          // pagination: { pageIndex: 0, pageSize: 20 },
+          pagination: { pageIndex: 0, pageSize: 15 },
           // sorting: [{ id: "name", desc: false }], //sort by state by default
         }}
         displayColumnDefOptions={{
           "mrt-row-actions": {
             header: "", //change header text
-            size: 120, //make actions column wider
+            size: 130, //make actions column wider
           },
         }}
-        muiToolbarAlertBannerChipProps={{ color: "primary" }}
         muiTableContainerProps={{
           sx: {
             maxHeight: 700,
@@ -222,10 +260,6 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
             color: "primary",
           },
         }}
-        positionToolbarAlertBanner="bottom"
-        enableRowSelection
-        enableRowNumbers
-        rowNumberMode="original" //default
         muiTableBodyCellEditTextFieldProps={({ cell }) => ({
           onBlur: (event) => {
             console.info(event, cell.id);
@@ -240,22 +274,9 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
         muiTableBodyCellProps={{
           align: "left",
         }}
-        columns={columns}
-        data={data}
-        enableEditing={true}
-        editingMode="modal"
-        enableSorting={true}
-        enableColumnOrdering
-        onEditingRowSave={handleSaveRow}
-        positionActionsColumn="last"
-        muiTableProps={{
-          sx: {
-            tableLayout: "fixed",
-          },
-        }}
         renderRowActions={({ row, table }) =>
           !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected() ? (
-            <Box sx={{ display: "flex", gap: "rem", ml: "1rem" }}>
+            <Box sx={{ display: "flex", gap: "rem", ml: "0.9rem" }}>
               <Tooltip arrow placement="right" title="Edit">
                 <IconButton onClick={() => table.setEditingRow(row)}>
                   <Edit fontSize="small" />
@@ -286,6 +307,7 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
             <></>
           )
         }
+        muiToolbarAlertBannerChipProps={{ color: "primary" }}
         renderTopToolbarCustomActions={({ table }) => (
           <Box
             sx={{
@@ -297,57 +319,53 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
           >
             {!table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected() ? (
               <Tooltip title="create service type">
-                <Button
+                <IconButton
                   color="primary"
                   onClick={() => setCreateModalOpen(true)}
-                  variant="text"
-                  startIcon={<AddIcon />}
-                  size="large"
-                />
+                >
+                  <AddBoxIcon />
+                </IconButton>
               </Tooltip>
             ) : (
               <Tooltip title="delete selected">
-                <Button
+                <IconButton
                   color="secondary"
                   onClick={() => {
                     handleClickOpenmulti(table.getSelectedRowModel().rows);
                   }}
-                  startIcon={<DeleteForeverIcon />}
-                  variant="text"
-                  sx={{ fontSize: "small" }}
-                />
+                >
+                  <DeleteForeverIcon />
+                </IconButton>
               </Tooltip>
             )}
 
             {!table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected() ? (
               <Tooltip title="export csv">
-                <Button
-                  color="primary"
-                  //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
-                  onClick={handleExportData}
-                  startIcon={<FileDownloadIcon />}
-                  variant="text"
-                  sx={{ fontSize: "small" }}
-                />
+                <IconButton onClick={handleExportData}>
+                  <FileDownloadIcon />
+                </IconButton>
               </Tooltip>
             ) : (
-              <Tooltip title="export selected raws">
-                <Button
-                  // disabled={
-                  //   !table.getIsSomeRowsSelected() &&
-                  //   !table.getIsAllRowsSelected()
-                  // }
-                  //only export selected rows
+              <Tooltip title="export selected rows">
+                <IconButton
+                  color="secondary"
                   onClick={() =>
                     handleExportRows(table.getSelectedRowModel().rows)
                   }
-                  startIcon={<FileDownloadIcon />}
-                  variant="text"
-                  color="secondary"
-                  sx={{ fontSize: "small" }}
-                />
+                >
+                  <FileDownloadIcon />
+                </IconButton>
               </Tooltip>
             )}
+            <Tooltip title="print">
+              <IconButton
+                onClick={() => {
+                  window.print();
+                }}
+              >
+                <PrintIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         )}
       />
@@ -364,12 +382,19 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {showitems ? "" : " Are you sure?"}
+          {showitems
+            ? ""
+            : `${deleteitemsdetail.length} Service types will be deleted`}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            {`${deleteitems}` +
-              `${showitems[0]} '\t' ${showitems[1]} +'\n'+ ${showitems[2]}`}
+            <List>
+              {showitems
+                ? showitems?.map((item) => <ListItem>{item}</ListItem>)
+                : deleteitemsdetail.map((item) => (
+                    <ListItem>▸ {item}</ListItem>
+                  ))}
+            </List>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -380,13 +405,3 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
     </>
   );
 };
-
-// const validateRequired = (value) => !!value.length;
-// const validateEmail = (email) =>
-//   !!email.length &&
-//   email
-//     .toLowerCase()
-//     .match(
-//       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-//     );
-// const validateAge = (age) => age >= 18 && age <= 50;
