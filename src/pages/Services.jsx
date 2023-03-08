@@ -5,7 +5,7 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import CrudTable from "./Servicelist/CrudTable";
+import Service from "./servicelists/Service";
 import Box from "@mui/material/Box";
 function Services() {
   const [value, setValue] = React.useState("1");
@@ -24,7 +24,7 @@ function Services() {
           </TabList>
         </Box>
         <TabPanel value="1">
-          <CrudTable />
+          <Service />
         </TabPanel>
         <TabPanel value="2">
           <ServiceTypes />

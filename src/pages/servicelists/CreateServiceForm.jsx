@@ -19,15 +19,8 @@ import {
   Tooltip,
 } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
-
 //example of creating a mui dialog modal for creating new rows
-export default function CreateServiceForm({
-  open,
-  columns,
-  onClose,
-  onSubmit,
-  data2,
-}) {
+const CreateServiceForm = ({ open, columns, onClose, onSubmit, data2 }) => {
   const [values, setValues] = useState(() =>
     columns.reduce((acc, column) => {
       acc[column.accessorKey ?? ""] = "";
@@ -46,10 +39,20 @@ export default function CreateServiceForm({
 
   return (
     <Dialog open={open}>
-      <DialogTitle textAlign="center">Create New Account</DialogTitle>
+      <DialogTitle textAlign="center">Create New Service</DialogTitle>
       <DialogContent>
         <form onSubmit={(e) => e.preventDefault()}>
-          <Stack
+          {columns.map((column) => (
+            <TextField
+              key={column.accessorKey}
+              label={column.header}
+              name={column.accessorKey}
+              onChange={(e) =>
+                setValues({ ...values, [e.target.name]: e.target.value })
+              }
+            />
+          ))}
+          {/* <Stack
             sx={{
               width: "100%",
               minWidth: { xs: "300px", sm: "360px", md: "400px" },
@@ -65,16 +68,6 @@ export default function CreateServiceForm({
               variant="outlined"
             />
             <TextField
-              key={columns.requirment}
-              label={columns.Requirment}
-              name={columns.requirment}
-              onChange={(e) =>
-                setValues({ ...values, requirment: e.target.value })
-              }
-              value={values.requirment}
-              variant="outlined"
-            />
-            <TextField
               key={columns.description}
               label={columns.Description}
               name={columns.description}
@@ -82,6 +75,16 @@ export default function CreateServiceForm({
                 setValues({ ...values, description: e.target.value })
               }
               value={values.description}
+              variant="outlined"
+            />
+            <TextField
+              key={columns.requirment}
+              label={columns.Requirment}
+              name={columns.requirment}
+              onChange={(e) =>
+                setValues({ ...values, requirment: e.target.value })
+              }
+              value={values.requirment}
               variant="outlined"
             />
 
@@ -95,13 +98,13 @@ export default function CreateServiceForm({
               value={values.service_types}
               variant="outlined"
             >
-              {data2.map((item) => (
+              {data2?.map((item) => (
                 <MenuItem key={item.id} value={item.id}>
                   {item.name}
                 </MenuItem>
               ))}
             </Select>
-          </Stack>
+          </Stack> */}
         </form>
       </DialogContent>
       <DialogActions sx={{ p: "1.25rem" }}>
@@ -112,6 +115,6 @@ export default function CreateServiceForm({
       </DialogActions>
     </Dialog>
   );
-}
+};
 
-// export default CreateServiceForm;
+export default CreateServiceForm;
