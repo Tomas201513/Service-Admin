@@ -27,6 +27,7 @@ import Calendar from "./pages/Calendar";
 import Kanban from "./pages/Kanban";
 import Chat from "./pages/Chat";
 import Report from "./pages/Report";
+import TextEditor from "./pages/TextEditor";
 // import ServiceList from "./pages/Servicelist/ServiceList";
 import CrudTable from "./pages/Servicelist/CrudTable";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -64,7 +65,7 @@ const App = () => {
                   <Route path="/services" element={<Services />}>
                     <Route
                       index
-                      path="/services/servicelist"
+                      path="/services/service-list"
                       element={<CrudTable />}
                     />
 
@@ -78,13 +79,14 @@ const App = () => {
                   </Route>
                   <Route path="/apointment" element={<Apointment />} />
                   <Route path="/payment" element={<Payment />} />
+                  <Route path="/account" element={<UserAccount />} />
+                  <Route path="/service-request" element={<ServiceRequest />} />
+                  <Route path="/cirtificate" element={<Certificate />} />
+                  <Route path="/report" element={<Report />} />
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/kanban" element={<Kanban />} />
+                  <Route path="/text-editor" element={<TextEditor />} />
                   <Route path="/chat" element={<Chat />} />
-                  <Route path="/account" element={<UserAccount />} />
-                  <Route path="/certificate" element={<Certificate />} />
-                  <Route path="/serviceRequest" element={<ServiceRequest />} />
-                  <Route path="/report" element={<Report />} />
                 </Route>
               </Route>
             </Routes>

@@ -5,14 +5,16 @@ import WorkspacesIcon from "@mui/icons-material/Workspaces";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import PaymentIcon from "@mui/icons-material/Payment";
 import EventIcon from "@mui/icons-material/Event";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import HailIcon from "@mui/icons-material/Hail";
 
-import AccountBoxIcon from "@mui/icons-material/AccountBox";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import DescriptionIcon from "@mui/icons-material/Description";
 
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
 import ChatIcon from "@mui/icons-material/Chat";
-
+import RttIcon from "@mui/icons-material/Rtt";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 export const dashboard = [
   {
@@ -70,6 +72,20 @@ export const services = [
     url: "/payment",
     icon: <PaymentIcon />,
   },
+  {
+    id: "service-request",
+    title: "Service Request",
+    type: "item",
+    url: "/service-request",
+    icon: <HailIcon />,
+  },
+  {
+    id: "cirtificate",
+    title: "Cirtificate",
+    type: "item",
+    url: "/cirtificate",
+    icon: <ReceiptIcon />,
+  },
 ];
 
 export const apps = [
@@ -95,6 +111,13 @@ export const apps = [
     url: "/chat",
     icon: <ChatIcon />,
   },
+  {
+    id: "text-editor",
+    title: "Text Editor",
+    type: "item",
+    url: "/text-editor",
+    icon: <RttIcon />,
+  },
 ];
 export const account = [
   {
@@ -102,7 +125,7 @@ export const account = [
     title: "Account",
     type: "item",
     url: "/account",
-    icon: <AccountBoxIcon />,
+    icon: <ManageAccountsIcon />,
     breadcrumbs: false,
   },
   {

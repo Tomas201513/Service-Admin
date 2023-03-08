@@ -1,5 +1,5 @@
 import React from "react";
-import { ServiceTypesCrud } from "./ServiceTypesTable";
+import { ServiceTable } from "./ServiceTypesTable";
 export function ServiceTypes() {
   const service_type_column = [
     {
@@ -38,7 +38,5 @@ export function ServiceTypes() {
 
   const service_type_api = ["http://127.0.0.1:8000/service/servicetype/"];
 
-  return (
-    <ServiceTypesCrud columnss={service_type_column} api={service_type_api} />
-  );
+  return <ServiceTable columnss={service_type_column} api={service_type_api} />;
 }

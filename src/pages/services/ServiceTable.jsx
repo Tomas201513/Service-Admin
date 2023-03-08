@@ -1,4 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from "react-query";
 import React, {
   useState,
   useEffect,
@@ -7,12 +6,14 @@ import React, {
   useReducer,
   useCallback,
 } from "react";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import PrintIcon from "@mui/icons-material/Print";
-// const axios = require("axios").default;
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { ExportToCsv } from "export-to-csv";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { Delete, Edit, MultilineChart } from "@mui/icons-material";
+import AddBoxIcon from "@mui/icons-material/AddBox";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
 import {
   Box,
@@ -31,13 +32,11 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import MaterialReactTable from "material-react-table";
-import { Delete, Edit, MultilineChart } from "@mui/icons-material";
-import AddBoxIcon from "@mui/icons-material/AddBox";
-import CreateNewAccountModal from "./CreateNewAccountModal";
 import DialogContentText from "@mui/material/DialogContentText";
+import MaterialReactTable from "material-react-table";
+import { ExportToCsv } from "export-to-csv";
 import { SnackbarProvider, useSnackbar } from "notistack";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import CreateNewAccountModal from "./CreateServiceForm";
 
 export const ServiceTypesCrud = ({ columnss, api }) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -83,9 +82,9 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
     setOpen(false);
   };
   const handleDelete = (deleteitems) => {
-    handleDeleteRow(deleteitems);
+    deleteRaw(deleteitems);
   };
-  const handleDeleteRow = async (values, row) => {
+  const deleteRaw = async (values, row) => {
     // console.log(values.original.id);
     // setLoading(values.original.id);
     console.log(deleteitems);
@@ -138,10 +137,20 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
         );
       },
       onError: (error) => {
-        console.log(error);
-        enqueueSnackbar("unable to create Service Type ", {
-          variant: "error",
-        });
+        console.log(error.response.request.status);
+        console.log(JSON.parse(error.response.request.responseText).name[0]);
+        if (error.response.request.status === 400) {
+          enqueueSnackbar(
+            JSON.parse(error.response.request.responseText).name[0],
+            {
+              variant: "error",
+            }
+          );
+        } else {
+          enqueueSnackbar(error.response.data.error, {
+            variant: "error",
+          });
+        }
       },
     }
   );
@@ -149,39 +158,34 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
   //exitEditingMode--used to cancil dialogebox
   //row--passes the position of the row
   //values--pass the real data
-  const handleSaveRow = async ({ exitEditingMode, row, values }) => {
-    console.log(values.id);
-    console.log(values.name);
-    console.log(values.description);
-    const response = await fetch(`${api}${values.id}/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id: values.id,
-        name: values.name,
-        description: values.description,
-      }),
-    });
-    if (response.status === 200) {
-      //replace this ersponse  with stickynote status
-      console.log(response.status);
-      enqueueSnackbar("Service Type Updated", {
-        variant: "success",
-      });
-    } else {
-      enqueueSnackbar(`UNABLE TO UPDATE SERVICE TYPE ${values.name}`, {
+  const updateRaw = async ({ exitEditingMode, row, values }) => {
+    // console.log(values.id);
+    // console.log(values.name);
+    // console.log(values.description);
+    try {
+      const response = await axios.put(`${api}${values.id}/`, values);
+      if (response.status === 200) {
+        //replace this ersponse  with stickynote status
+        console.log(response.status);
+        enqueueSnackbar(`Service Type "${values.name}" Updated`, {
+          variant: "success",
+        });
+      } else {
+        enqueueSnackbar(`Unable to update "${values.name}"`, {
+          variant: "error",
+        });
+      }
+    } catch (error) {
+      enqueueSnackbar(error.response.data.error, {
         variant: "error",
       });
     }
     exitEditingMode();
+    queryClient.invalidateQueries("service_types");
   };
-  // create a function that update local state when the user edits a cell
 
-  const handleCancelRowEdits = () => {
-    // setValidationErrors({});
-  };
+  // useQuery is a hook that takes a key, a function that will fetch the data, and an object with options. In this case, we are using the key "repoData" to identify the data fetch, and the function is a fetch to the API endpoint. The options object is setting the refetch interval to 1 second.
+
   const { isLoading, error, data } = useQuery(
     "repoData",
     () => fetch(`${api}`).then((res) => res.json()),
@@ -190,7 +194,6 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
       refetchInterval: 1000,
     }
   );
-
   if (error) return "An error has occurred: " + error.message;
   if (isLoading) return console.log(isLoading);
 
@@ -221,7 +224,7 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
         editingMode="modal"
         enableSorting={true}
         enableColumnOrdering
-        onEditingRowSave={handleSaveRow}
+        onEditingRowSave={updateRaw}
         positionActionsColumn="last"
         enablePinning
         enableRowVirtualization
