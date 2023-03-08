@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import MaterialReactTable from "material-react-table";
+// const axios = require("axios").default;
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
   Box,
@@ -10,16 +11,23 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  InputLabel,
+  Select,
   MenuItem,
   Stack,
-  Select,
   TextField,
-  TextareaAutosize,
   Tooltip,
 } from "@mui/material";
+import { Delete, Edit } from "@mui/icons-material";
 
 //example of creating a mui dialog modal for creating new rows
-const CreateServiceTypeForm = ({ open, columns, onClose, onSubmit }) => {
+export default function CreateServiceForm({
+  open,
+  columns,
+  onClose,
+  onSubmit,
+  data2,
+}) {
   const [values, setValues] = useState(() =>
     columns.reduce((acc, column) => {
       acc[column.accessorKey ?? ""] = "";
@@ -27,8 +35,11 @@ const CreateServiceTypeForm = ({ open, columns, onClose, onSubmit }) => {
     }, {})
   );
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
     //put your validation logic here
+    console.log(`suuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu`);
+
+    console.log(values);
     onSubmit(values);
     onClose();
   };
@@ -53,9 +64,17 @@ const CreateServiceTypeForm = ({ open, columns, onClose, onSubmit }) => {
               value={values.name}
               variant="outlined"
             />
-
-            <TextareaAutosize
-              minRows={5}
+            <TextField
+              key={columns.requirment}
+              label={columns.Requirment}
+              name={columns.requirment}
+              onChange={(e) =>
+                setValues({ ...values, requirment: e.target.value })
+              }
+              value={values.requirment}
+              variant="outlined"
+            />
+            <TextField
               key={columns.description}
               label={columns.Description}
               name={columns.description}
@@ -65,17 +84,34 @@ const CreateServiceTypeForm = ({ open, columns, onClose, onSubmit }) => {
               value={values.description}
               variant="outlined"
             />
+
+            <Select
+              key={columns.service_types}
+              label={columns.Service_Types}
+              name={columns.service_types}
+              onChange={(e) =>
+                setValues({ ...values, service_types: e.target.value })
+              }
+              value={values.service_types}
+              variant="outlined"
+            >
+              {data2.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </Select>
           </Stack>
         </form>
       </DialogContent>
       <DialogActions sx={{ p: "1.25rem" }}>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained">
-          Create
+        <Button color="secondary" onClick={handleSubmit} variant="contained">
+          Create New Account
         </Button>
       </DialogActions>
     </Dialog>
   );
-};
+}
 
-export default CreateServiceTypeForm;
+// export default CreateServiceForm;

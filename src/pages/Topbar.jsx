@@ -22,6 +22,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import AuthContext from "../context/AuthContext";
 import PersonIcon from "@mui/icons-material/Person";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import GTranslateIcon from "@mui/icons-material/GTranslate";
 import { services, apps, account, dashboard } from "../menu-item/sidebaritems";
 import {
   Avatar,
@@ -149,12 +150,18 @@ export default function Topbar() {
           </Typography> */}
           <Box sx={{ width: "100%", ml: 1 }} />
           <IconButton
+            // onClick={handleClick("bottom-end")}
+            sx={{ borderRadius: 5, color: "#757575", mr: 1, ml: 1, p: 0 }}
+          >
+            <GTranslateIcon />
+          </IconButton>
+          <IconButton
             onClick={handleClick("bottom-end")}
             sx={{ borderRadius: 5 }}
           >
             <Avatar
               alt="profile user"
-              src={avatar1}
+              // src={avatar1}
               sx={{ width: 32, height: 32 }}
             />
           </IconButton>

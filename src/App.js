@@ -14,7 +14,6 @@ import { CssBaseline, Table } from "@mui/material";
 import Dashboard from "./pages/Dashboard";
 import Payment from "./pages/Payment";
 import Services from "./pages/Services";
-import { ServiceTypes } from "./pages/Servicetype/ServiceTypes";
 import ServiceRequest from "./pages/ServiceRequest";
 import Employee from "./pages/Employee";
 import Department from "./pages/Department";
@@ -29,7 +28,9 @@ import Chat from "./pages/Chat";
 import Report from "./pages/Report";
 import TextEditor from "./pages/TextEditor";
 // import ServiceList from "./pages/Servicelist/ServiceList";
-import CrudTable from "./pages/Servicelist/CrudTable";
+// import CrudTable from "./pages/servicelists/CrudTable";
+import { ServiceTypes } from "./pages/Servicetype/ServiceTypes";
+import Service from "./pages/servicelists/Service";
 import { QueryClient, QueryClientProvider } from "react-query";
 const queryClient = new QueryClient();
 const App = () => {
@@ -66,7 +67,7 @@ const App = () => {
                     <Route
                       index
                       path="/services/service-list"
-                      element={<CrudTable />}
+                      element={<Service />}
                     />
 
                     <Route path="/services/type" element={<ServiceTypes />} />

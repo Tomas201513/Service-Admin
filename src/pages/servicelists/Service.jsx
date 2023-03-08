@@ -1,6 +1,6 @@
 import React from "react";
-import { ServiceTable } from "./ServiceTypesTable";
-export function ServiceTypes() {
+import ServiceTable from "./ServiceTable";
+export default function Service() {
   const service_type_column = [
     {
       header: "Id",

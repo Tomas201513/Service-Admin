@@ -11,7 +11,6 @@ import PrintIcon from "@mui/icons-material/Print";
 // const axios = require("axios").default;
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { ExportToCsv } from "export-to-csv";
-import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import axios from "axios";
 import {
@@ -32,14 +31,14 @@ import {
   Tooltip,
 } from "@mui/material";
 import MaterialReactTable from "material-react-table";
-import { Delete, Edit, MultilineChart } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 import AddBoxIcon from "@mui/icons-material/AddBox";
-import CreateNewAccountModal from "./CreateNewAccountModal";
+import CreateNewAccountModal from "./CreateServiceTypeForm";
 import DialogContentText from "@mui/material/DialogContentText";
-import { SnackbarProvider, useSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
-export const ServiceTypesCrud = ({ columnss, api }) => {
+export function ServiceTypesTable({ columnss, api }) {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [rowSelection, setRowSelection] = useState({});
   // console.log(rowSelection);
@@ -408,4 +407,4 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
       </Dialog>
     </>
   );
-};
+}

@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import React, {
   useState,
   useEffect,
@@ -6,14 +7,11 @@ import React, {
   useReducer,
   useCallback,
 } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
 import PrintIcon from "@mui/icons-material/Print";
+// const axios = require("axios").default;
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import AddIcon from "@mui/icons-material/Add";
+import { ExportToCsv } from "export-to-csv";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { Delete, Edit, MultilineChart } from "@mui/icons-material";
-import AddBoxIcon from "@mui/icons-material/AddBox";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
 import {
   Box,
@@ -32,13 +30,15 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import DialogContentText from "@mui/material/DialogContentText";
 import MaterialReactTable from "material-react-table";
-import { ExportToCsv } from "export-to-csv";
-import { SnackbarProvider, useSnackbar } from "notistack";
-import CreateNewAccountModal from "./CreateServiceForm";
+import { Delete, Edit } from "@mui/icons-material";
+import AddBoxIcon from "@mui/icons-material/AddBox";
+import CreateServiceForm from "./CreateServiceForm";
+import DialogContentText from "@mui/material/DialogContentText";
+import { useSnackbar } from "notistack";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
-export const ServiceTypesCrud = ({ columnss, api }) => {
+export default function ServiceTable({ columnss, api }) {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [rowSelection, setRowSelection] = useState({});
   // console.log(rowSelection);
@@ -372,7 +372,7 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
           </Box>
         )}
       />
-      <CreateNewAccountModal
+      <CreateServiceForm
         columns={columns}
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
@@ -407,4 +407,4 @@ export const ServiceTypesCrud = ({ columnss, api }) => {
       </Dialog>
     </>
   );
-};
+}
