@@ -75,7 +75,6 @@ export default function DepartmentTable({ api }) {
   const columns = [
     {
       header: "Id",
-
       accessorKey: "id",
       enableEditing: false,
       enableClickToCopy: true,
@@ -154,8 +153,9 @@ export default function DepartmentTable({ api }) {
       row.original.id,
       row.original.name,
       row.original.description,
-      row.original.requirment,
-      row.original.service_types.name
+      row.original.office_no,
+      row.original.phone_number,
+      row.original.services.name
     );
 
     setOpen(true);
@@ -228,8 +228,9 @@ export default function DepartmentTable({ api }) {
       .put(`${api}${values.id}/`, {
         name: values.name,
         description: values.description,
-        requirment: values.requirment,
-        service_types: values[`service_types.name`],
+        office_no: values.office_no,
+        phone_number: values.phone_number,
+        services: values[`services.name`],
       })
       .then((response) => {
         if (response.status === 200) {
@@ -256,7 +257,7 @@ export default function DepartmentTable({ api }) {
     handleClose();
     exitEditingMode();
 
-    queryClient.invalidateQueries("service_types");
+    queryClient.invalidateQueries("departments");
   };
 
   // create a useMutation hook to handle the POST request to the API and update the browser cache
@@ -264,7 +265,7 @@ export default function DepartmentTable({ api }) {
     (values) => axios.post(api, values),
     {
       onSuccess: (values) => {
-        queryClient.invalidateQueries("service_types");
+        queryClient.invalidateQueries("departments");
 
         enqueueSnackbar(
           `Service Type ${JSON.stringify(values.data.name)} Created`,
@@ -275,10 +276,12 @@ export default function DepartmentTable({ api }) {
       },
       onError: (error) => {
         console.log(error.response.request.status);
-        console.log(JSON.parse(error.response.request.responseText).name[0]);
+        console.log(
+          JSON.parse(error.response.request.responseText).services[0]
+        );
         if (error.response.request.status === 400) {
           enqueueSnackbar(
-            JSON.parse(error.response.request.responseText).name[0],
+            JSON.parse(error.response.request.responseText).services[0],
             {
               variant: "error",
             }
@@ -302,6 +305,7 @@ export default function DepartmentTable({ api }) {
       refetchInterval: 1000,
     }
   );
+  //   console.log(data?.results);
   if (error) return "An error has occurred: " + error.message;
   if (isLoading) return console.log(isLoading);
 

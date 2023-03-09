@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 //example of creating a mui dialog modal for creating new rows
-const CreateServiceForm = ({ open, columns, onClose, onSubmit, data2 }) => {
+const DepartmentForm = ({ open, columns, onClose, onSubmit, data2 }) => {
   const [values, setValues] = useState(() =>
     columns.reduce((acc, column) => {
       acc[column.accessorKey ?? ""] = "";
@@ -90,7 +90,7 @@ const CreateServiceForm = ({ open, columns, onClose, onSubmit, data2 }) => {
 
             <Select
               key={columns.services}
-              label="Service Types"
+              label="Services"
               name={columns.services}
               onChange={(e) =>
                 setValues({ ...values, services: e.target.value })
@@ -117,4 +117,4 @@ const CreateServiceForm = ({ open, columns, onClose, onSubmit, data2 }) => {
   );
 };
 
-export default CreateServiceForm;
+export default DepartmentForm;

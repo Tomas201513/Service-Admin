@@ -294,6 +294,7 @@ export default function ServiceTable({ api }) {
       refetchInterval: 1000,
     }
   );
+  console.log(data);
   if (error) return "An error has occurred: " + error.message;
   if (isLoading) return console.log(isLoading);
 
