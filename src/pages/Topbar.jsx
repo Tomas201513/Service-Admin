@@ -224,9 +224,7 @@ export default function Topbar() {
         anchor="left"
         open={open}
       >
-        <DrawerHeader>
-          <Logo />{" "}
-        </DrawerHeader>
+        <DrawerHeader>{/* <Logo />{" "} */}</DrawerHeader>
         <Divider />
 
         <List>

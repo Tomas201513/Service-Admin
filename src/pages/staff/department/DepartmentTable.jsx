@@ -33,12 +33,12 @@ import {
 import MaterialReactTable from "material-react-table";
 import { Delete, Edit } from "@mui/icons-material";
 import AddBoxIcon from "@mui/icons-material/AddBox";
-import CreateServiceForm from "./CreateServiceForm";
+import DepartmentForm from "./DepartmentForm";
 import DialogContentText from "@mui/material/DialogContentText";
 import { useSnackbar } from "notistack";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
-export default function ServiceTable({ api }) {
+export default function DepartmentTable({ api }) {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [rowSelection, setRowSelection] = useState({});
   // console.log(rowSelection);
@@ -52,12 +52,12 @@ export default function ServiceTable({ api }) {
     error: error2,
     data: data2,
   } = useQuery("repoData2", () =>
-    fetch("http://127.0.0.1:8000/service/servicetype/").then(
+    fetch("http://127.0.0.1:8000/service/service/").then(
       (res) => res.json()
       // { refetchInterval: 1000 }
     )
   );
-  console.log(data2);
+  // console.log(data2);
   // console.log(typeof data2[0]);
   // console.log(data2[0].id);
   // declare an array
@@ -106,8 +106,16 @@ export default function ServiceTable({ api }) {
       size: 100, //medium column
     },
     {
-      header: "Requirment",
-      accessorKey: "requirment",
+      header: "Office No",
+      accessorKey: "office_no",
+      enableClickToCopy: true,
+      minSize: 200, //min size enforced during resizing
+      maxSize: 400, //max size enforced during resizing
+      size: 100, //medium column
+    },
+    {
+      header: "Phone No",
+      accessorKey: "phone_number",
       enableClickToCopy: true,
       minSize: 200, //min size enforced during resizing
       maxSize: 400, //max size enforced during resizing
@@ -116,7 +124,7 @@ export default function ServiceTable({ api }) {
 
     {
       header: "Service",
-      accessorKey: "service_types.name",
+      accessorKey: "services.name",
       select: true,
       enableClickToCopy: true,
       minSize: 200, //min size enforced during resizing
@@ -139,15 +147,16 @@ export default function ServiceTable({ api }) {
   const handleClickShow = (row) => {
     // console.log(row.original);
     // setShowitems(row.original);
-    setShowitems(Object.values(row.original));
+    // setShowitems(Object.values(row.original));
+
     console.log(showitems);
-    // showitems?.push(
-    //   row.original.id,
-    //   row.original.name,
-    //   row.original.description,
-    //   row.original.requirment,
-    //   row.original.service_types.name
-    // );
+    showitems?.push(
+      row.original.id,
+      row.original.name,
+      row.original.description,
+      row.original.requirment,
+      row.original.service_types.name
+    );
 
     setOpen(true);
   };
@@ -175,23 +184,20 @@ export default function ServiceTable({ api }) {
   };
   const handleClose = () => {
     setShowitems([]);
-    console.log(showitems);
     setDeleteitems([]);
     setDeleteitemsdetail([]);
     setOpen(false);
+    // console.log(showitems);
+    // console.log(Object.values(deleteitems));
+    // console.log(deleteitems);
   };
-  const handleDelete = (deleteitems) => {
-    deleteRaw(deleteitems);
-  };
-  const deleteRaw = async (values, row) => {
-    // console.log(values.original.id);
-    // setLoading(values.original.id);
-    console.log(deleteitems);
-    // console.log(deleteitemsdetail);
-    deleteitems?.map(async (id, index) => {
-      axios
-        .delete(`${api}${id}/`)
-        .then((response) => {
+
+  const handleDelete = () => {
+    // deleteRaw(deleteitems);
+    console.log(JSON.stringify(deleteitems));
+    deleteitems?.map(
+      async (id, index) =>
+        await axios.delete(`${api}${id}/`).then((response) => {
           if (response.status === 204) {
             //replace this ersponse  with stickynote status
             console.log(response.status);
@@ -203,21 +209,53 @@ export default function ServiceTable({ api }) {
               setRowSelection({})
             );
           } else {
-            enqueueSnackbar(
-              `UNABLE TO DELETE SERVICE TYPE ${deleteitemsdetail[index]}`,
-              {
-                variant: "error",
-              }
-            );
+            enqueueSnackbar(`UNABLE TO DELETE SERVICE TYPE`, {
+              variant: "error",
+            });
           }
         })
-        .catch((error) => {
-          enqueueSnackbar(error.response.data.error, {
+    );
+    handleClose();
+  };
+
+  //exitEditingMode--used to cancil dialogebox
+  //row--passes the position of the row
+  //values--pass the real data
+  // create a axios put request to the API and update
+  const updateRaw = async ({ exitEditingMode, values, row }) => {
+    console.log(values);
+    axios
+      .put(`${api}${values.id}/`, {
+        name: values.name,
+        description: values.description,
+        requirment: values.requirment,
+        service_types: values[`service_types.name`],
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          //replace this ersponse  with stickynote status
+          console.log(response.status);
+          enqueueSnackbar(
+            `Service Type ${values.name} Updated`,
+            {
+              variant: "success",
+            },
+            setRowSelection({})
+          );
+        } else {
+          enqueueSnackbar(`UNABLE TO UPDATE SERVICE TYPE ${values.name}`, {
             variant: "error",
           });
+        }
+      })
+      .catch((error) => {
+        enqueueSnackbar(error.response.data.error, {
+          variant: "error",
         });
-    });
+      });
     handleClose();
+    exitEditingMode();
+
     queryClient.invalidateQueries("service_types");
   };
 
@@ -253,35 +291,6 @@ export default function ServiceTable({ api }) {
       },
     }
   );
-
-  //exitEditingMode--used to cancil dialogebox
-  //row--passes the position of the row
-  //values--pass the real data
-  const updateRaw = async ({ exitEditingMode, row, values }) => {
-    // console.log(values.id);
-    // console.log(values.name);
-    // console.log(values.description);
-    try {
-      const response = await axios.put(`${api}${values.id}/`, values);
-      if (response.status === 200) {
-        //replace this ersponse  with stickynote status
-        console.log(response.status);
-        enqueueSnackbar(`Service Type "${values.name}" Updated`, {
-          variant: "success",
-        });
-      } else {
-        enqueueSnackbar(`Unable to update "${values.name}"`, {
-          variant: "error",
-        });
-      }
-    } catch (error) {
-      enqueueSnackbar(error.response.data.error, {
-        variant: "error",
-      });
-    }
-    exitEditingMode();
-    queryClient.invalidateQueries("service_types");
-  };
 
   // useQuery is a hook that takes a key, a function that will fetch the data, and an object with options. In this case, we are using the key "repoData" to identify the data fetch, and the function is a fetch to the API endpoint. The options object is setting the refetch interval to 1 second.
 
@@ -487,7 +496,7 @@ export default function ServiceTable({ api }) {
               </Box>
             )}
           />
-          <CreateServiceForm
+          <DepartmentForm
             open={createModalOpen}
             columns={columns}
             onClose={() => setCreateModalOpen(false)}
@@ -501,25 +510,33 @@ export default function ServiceTable({ api }) {
             aria-describedby="alert-dialog-description"
           >
             <DialogTitle id="alert-dialog-title">
-              {showitems
+              {!deleteitems.length
                 ? ""
                 : `${deleteitemsdetail.length} Service will be deleted`}
             </DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
                 <List>
-                  {showitems
-                    ? ""
+                  {!deleteitems.length
+                    ? showitems.map((item, index) => (
+                        <ListItem key={item}>
+                          ▸<Typography component={"span"}>{item}</Typography>{" "}
+                        </ListItem>
+                      ))
                     : deleteitemsdetail.map((item) => (
-                        <ListItem>
-                          ▸<Typography>{item}</Typography>{" "}
+                        <ListItem key={deleteitems}>
+                          ▸<Typography component={"span"}>{item}</Typography>{" "}
                         </ListItem>
                       ))}
                 </List>
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              {showitems ? "" : <Button onClick={handleDelete}>Delete</Button>}
+              {!deleteitems.length ? (
+                ""
+              ) : (
+                <Button onClick={handleDelete}>Delete</Button>
+              )}
               <Button onClick={handleClose}>Cancel</Button>
             </DialogActions>
           </Dialog>

@@ -39,20 +39,10 @@ const CreateServiceForm = ({ open, columns, onClose, onSubmit, data2 }) => {
 
   return (
     <Dialog open={open}>
-      <DialogTitle textAlign="center">Create New Service</DialogTitle>
+      <DialogTitle textAlign="center">Create New Department</DialogTitle>
       <DialogContent>
         <form onSubmit={(e) => e.preventDefault()}>
-          {columns.map((column) => (
-            <TextField
-              key={column.accessorKey}
-              label={column.header}
-              name={column.accessorKey}
-              onChange={(e) =>
-                setValues({ ...values, [e.target.name]: e.target.value })
-              }
-            />
-          ))}
-          {/* <Stack
+          <Stack
             sx={{
               width: "100%",
               minWidth: { xs: "300px", sm: "360px", md: "400px" },
@@ -61,7 +51,7 @@ const CreateServiceForm = ({ open, columns, onClose, onSubmit, data2 }) => {
           >
             <TextField
               key={columns.name}
-              label={columns.Name}
+              label="Name"
               name={columns.name}
               onChange={(e) => setValues({ ...values, name: e.target.value })}
               value={values.name}
@@ -69,7 +59,7 @@ const CreateServiceForm = ({ open, columns, onClose, onSubmit, data2 }) => {
             />
             <TextField
               key={columns.description}
-              label={columns.Description}
+              label="Description"
               name={columns.description}
               onChange={(e) =>
                 setValues({ ...values, description: e.target.value })
@@ -78,24 +68,34 @@ const CreateServiceForm = ({ open, columns, onClose, onSubmit, data2 }) => {
               variant="outlined"
             />
             <TextField
-              key={columns.requirment}
-              label={columns.Requirment}
-              name={columns.requirment}
+              key={columns.office_no}
+              label="office_no"
+              name={columns.office_no}
               onChange={(e) =>
-                setValues({ ...values, requirment: e.target.value })
+                setValues({ ...values, office_no: e.target.value })
               }
-              value={values.requirment}
+              value={values.office_no}
+              variant="outlined"
+            />
+            <TextField
+              key={columns.phone_number}
+              label="phone_number"
+              name={columns.phone_number}
+              onChange={(e) =>
+                setValues({ ...values, phone_number: e.target.value })
+              }
+              value={values.phone_number}
               variant="outlined"
             />
 
             <Select
-              key={columns.service_types}
-              label={columns.Service_Types}
-              name={columns.service_types}
+              key={columns.services}
+              label="Service Types"
+              name={columns.services}
               onChange={(e) =>
-                setValues({ ...values, service_types: e.target.value })
+                setValues({ ...values, services: e.target.value })
               }
-              value={values.service_types}
+              value={values.services}
               variant="outlined"
             >
               {data2?.map((item) => (
@@ -104,13 +104,13 @@ const CreateServiceForm = ({ open, columns, onClose, onSubmit, data2 }) => {
                 </MenuItem>
               ))}
             </Select>
-          </Stack> */}
+          </Stack>
         </form>
       </DialogContent>
       <DialogActions sx={{ p: "1.25rem" }}>
         <Button onClick={onClose}>Cancel</Button>
         <Button color="secondary" onClick={handleSubmit} variant="contained">
-          Create New Account
+          Create
         </Button>
       </DialogActions>
     </Dialog>
