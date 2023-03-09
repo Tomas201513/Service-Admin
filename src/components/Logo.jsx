@@ -10,7 +10,7 @@ function Logo() {
       <ButtonBase disableRipple component={Link} to="/dashboard">
         <img src={logo} alt="Mantis" width="35" sx={{ mt: 1 }} />
         <Typography variant="h6" gutterBottom sx={{ ml: 1, mt: 2 }}>
-          INSA SERVICE
+          SERVICE
         </Typography>
       </ButtonBase>
     </Stack>
