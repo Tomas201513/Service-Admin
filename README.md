@@ -1,5 +1,5 @@
 # Service Admin
-# Simple MUI template but with full CRUD logic
+# Simple MUI template with full CRUD logic
 ![Screenshot](src/assets/serv.png)
 
 
